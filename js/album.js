@@ -1,5 +1,5 @@
 // JavaScript Document
-var total=8;
+var total=17;
 var zWin=$(window);	
 var render=function(){	
 	var padding=2;
@@ -28,12 +28,12 @@ var render=function(){
 	$('#container').html(temHtml);
 }
 render();
-
+//显示触发的大图
 var wImage=$('#large_img');
-var loadImg=function(id){
-	$('#container').css({height:zWin.height(),'overflow':'hidden'});
-	$('#large_container').css({width:zWin.width(),height:zWin.height()}).show();//设置css样式，显示图层
-	
+var domImage=wImage[0];//image标签的dom引用
+var loadImg=function(id,callback){
+	$('#container').css({height:zWin.height(),'overflow':'hidden'});//不显示图片列表露出区域
+	$('#large_container').css({width:zWin.width(),height:zWin.height()}).show();//设置css样式，显示大图div	
 	var imgsrc='images/'+id+'.large.jpg';
 	var imageObj=new Image();
 	imageObj.src=imgsrc;
@@ -49,59 +49,56 @@ var loadImg=function(id){
 		var realh=h*winWidth/w;
 		//竖图的显示高度，适用于图宽大于屏高
 		var paddingTop=parseInt((winHeight-realh)/2);
-		wImage.css('width','auto').css('height','auto');
+		wImage.css('width','auto').css('height','auto');//reset样式，避免滑动时相互影响
 		wImage.css('padding-left','0px').css('padding-top','0px');
 		if(h/w>1.2){
 			wImage.attr('src',imgsrc).css('height',winHeight).css('padding-left',paddingLeft);
 		}else{
 			wImage.attr('src',imgsrc).css('width',winWidth).css('padding-top',paddingTop);
 		}
+		callback&&callback();//未传callback参数就不执行切换动画
 	};
 	
 };
-//事件代理为动态生成标签添加事件
+//事件代理为动态生成标签添加事件，点击列表图片显示大图
+var cid;//记录当前图片序号
 $('#container').delegate('li','tap',function(){
-	var _id=$(this).attr('data-id');//自定义属性获取图片
+	var _id=cid=$(this).attr('data-id');//自定义属性获取图片
 	console.log(_id);
 	loadImg(_id);
 });
-
-	/*var cid;
-	var wImage = $('#large_img');
-	var domImage = wImage[0];
-
-	var loadImg = function(id,callback){
-		//$('#container').css({height:zWin.height(),'overflow':'hidden'})
-		$('#large_container').css({
-			width:zWin.width(),
-			height:zWin.height()
-			//top:$(window).scrollTop()
-		}).show();
-		var imgsrc = 'images/'+id+'.large.jpg';
-		var ImageObj = new Image();
-		
-		ImageObj.onload = function(){
-			var w = this.width;
-			var h = this.height;
-			var winWidth = zWin.width();
-			var winHeight = zWin.height();
-		    var realw = parseInt((winWidth - winHeight*w/h)/2);
-			var realh = parseInt((winHeight - winWidth*h/w)/2);
-
-			//wImage.css('width','auto').css('height','auto');
-			//wImage.css('padding-left','0px').css('padding-top','0px');
-			if(h/w>1.2){
-				 wImage.attr('src',imgsrc).css('height',winHeight).css('padding-left',realw+'px');;
-			}else{	
-				 wImage.attr('src',imgsrc).css('width',winWidth).css('padding-top',realh+'px');
-			}
-			
-			callback&&callback();
-		}
-		ImageObj.src = imgsrc;
-		
+//点击大图图层，关闭当前图层
+$('#large_container').tap(function(){
+	$('#container').css({hight:'auto'});
+	$(this).hide();
+});
+//向左滑动
+$('#large_container').swipeLeft(function(){
+	cid++;
+	if(cid>total){
+		cid=total;
+	}else{
+		loadImg(cid,function(){
+			domImage.addEventListener('webkitAnimationEnd',function(){
+				wImage.removeClass('animated bounceInRight');
+				domImage.removeEventListener('webkitAnimationEnd');
+			},false)
+			wImage.addClass('animated bounceInRight');
+		});
 	}
-	$('#container').delegate('li','tap',function(){
-		var _id = cid = $(this).attr('data-id');
-		loadImg(_id);
-	});*/
+});
+//向右滑动
+$('#large_container').swipeRight(function(){
+	cid--;
+	if(cid<1){
+		cid=1;
+	}else{
+		loadImg(cid,function(){
+			domImage.addEventListener('webkitAnimationEnd',function(){
+				wImage.removeClass('animated bounceInLeft');
+				domImage.removeEventListener('webkitAnimationEnd');
+			},false)
+			wImage.addClass('animated bounceInLeft');
+		});
+	}
+});
