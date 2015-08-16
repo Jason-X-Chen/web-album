@@ -13,7 +13,6 @@ var render=function(){
 		if(i%4==1){
 			p=0;
 		}//生成展示图片的HTML标签,添加CSS3动画效果
-		/*temHtml+='<li data-id="'+i+'"; class="animated bounceIn"; style="width:'+picWidth+'px;height:'+picWidth+'px;padding-top:'+padding+'px;padding-left:'+p+'px;"><img src="'+imgSrc+'" /></li>';*/
 		temHtml+='<li data-id="'+i+'"; class="animated bounceIn"; style="width:'+picWidth+'px;height:'+picWidth+'px;padding-top:'+padding+'px;padding-left:'+p+'px;"><canvas id="cvs_'+i+'"></canvas></li>';
 		var imageObj = new Image();//使用drawImage API绘制图片
 		imageObj.index=i;
@@ -69,7 +68,7 @@ $('#container').delegate('li','tap',function(){
 });
 //点击大图图层，关闭当前图层
 $('#large_container').tap(function(){
-	$('#container').css({hight:'auto'});
+	//$('#container').css({hight:'auto','overflow':'auto'});
 	$(this).hide();
 });
 //向左滑动
